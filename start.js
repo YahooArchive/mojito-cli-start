@@ -15,46 +15,7 @@ var path = require('path'),
     fs = require('fs');
 
 
-/**
- * Standard usage string export.
- */
-exports.usage = '\nmojito start [port]\n' +
-    '\t- port: (optional)\n' +
-    '\t  The port number specified here is an override. If a port is not\n' +
-    '\t  specified, the port number is obtained through the application\'s\n' +
-    '\t  configuration mechanism. If one is not found there, port 8666 is' +
-    ' used.\n' +
-    '\nOptions\n' +
-    '\t--context  A comma-separated list of key:value pairs that define the' +
-    ' base\n' +
-    '\t           context used to read configuration files\n' +
-    '\t--perf     Path and filename where to output performance metrics.\n';
-
-
-/**
- * Standard options list export.
- */
-exports.options = [
-    {
-        longName: 'context',
-        shortName: null,
-        hasValue: true
-    },
-    {
-        longName: 'perf',
-        shortName: null,
-        hasValue: true
-    }
-];
-
-
-/**
- * Standard run method hook export.
- * @param {Array} params An array of optional parameters.
- * @param {object} opts Options/flags for the command.
- * @param {function} callback An optional callback to invoke on completion.
- */
-exports.run = function(params, opts, callback) {
+function main(params, opts, callback) {
     var root = process.cwd(),
         store,
         appConfig,
@@ -101,4 +62,37 @@ exports.run = function(params, opts, callback) {
             (pack.name ? ' \'' + pack.name + '\'' : '') +
             ' on port ' + options.port + '\n');
     });
-};
+}
+
+
+/**
+ * Standard run method hook export.
+ * @param {Array} params An array of optional parameters.
+ * @param {object} opts Options/flags for the command.
+ * @param {function} callback An optional callback to invoke on completion.
+ */
+exports = main;
+
+/**
+ * Standard usage string export.
+ */
+exports.usage = '\nmojito start [port]\n' +
+    '\t- port: (optional)\n' +
+    '\t  The port number specified here is an override. If a port is not\n' +
+    '\t  specified, the port number is obtained through the application\'s\n' +
+    '\t  configuration mechanism. If one is not found there, port 8666 is' +
+    ' used.\n' +
+    '\nOptions\n' +
+    '\t--context  A comma-separated list of key:value pairs that define the' +
+    ' base\n' +
+    '\t           context used to read configuration files\n' +
+    '\t--perf     Path and filename where to output performance metrics.\n';
+
+
+/**
+ * Standard options list export.
+ */
+exports.options = [
+    {shortName: null, hasValue: true, longName: 'context'},
+    {shortName: null, hasValue: true, longName: 'perf'}
+];

@@ -1,8 +1,8 @@
 {
-  "name": "mojito-start",
+  "name": "mojito-cli-start",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "start.js",
   "dependencies": {},
   "devDependencies": {
     "tap": "~0.4.1"
@@ -19,9 +19,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/yahoo/mojito-start.git"
+    "url": "git://github.com/yahoo/mojito-cli-start.git"
   },
-  "bugs": "https://github.com/yahoo/mojito-start/issues",
+  "bugs": "https://github.com/yahoo/mojito-cli-start/issues",
   "contributors": [
     "Caridy Patino <caridy@gmail.com>",
     "Drew Folta <drew@folta.net>",

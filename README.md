@@ -3,11 +3,6 @@ mojito-cli-start
 
 This package provides the `start` command to start a Mojito server, for the [`mojito-cli`](https://github.com/yahoo/mojito-cli) tool. Install with `npm install -g mojito-cli`.
 
-Starting the Server
-
-Usage
------
-
 Use the following to start the server and run the application.
 
     mojito start [<port>] [--context "key1:value1,key2:value2,key3:value3"]

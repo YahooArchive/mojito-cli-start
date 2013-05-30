@@ -1,10 +1,18 @@
-mojito-cli-start [![Build Status](https://travis-ci.org/yahoo/{{name}}.png)](https://travis-ci.org/yahoo/{{name}})
+mojito-cli-start
 ==========
 
-Install
--------
-This package provides the `{{command}}` command for the [`mojito-cli`](https://github.com/yahoo/mojito-cli) tool.
+This package provides the `start` command to start a Mojito server, for the [`mojito-cli`](https://github.com/yahoo/mojito-cli) tool. Install with `npm install -g mojito-cli`.
 
+Starting the Server
+
+Usage
+-----
+
+Use the following to start the server and run the application.
+
+    mojito start [<port>] [--context "key1:value1,key2:value2,key3:value3"]
+
+The port number specified in the command above overrides the port number in the application configuration file, application.json. The default port number is 8666. See Specifying Context to learn how to use the --context option.
 
 Discussion/Forums
 -----------------

@@ -70,6 +70,20 @@ function getAppConfig(mojito_dir, cwd, context) {
     return appConfig;
 }
 
+/**
+ * invoke `mojito start` subcommand with env metadata and callback
+ * @see https://github.com/yahoo/mojito-cli/blob/develop/cli.js:exec()
+ * @param {object} env
+ *   @param {string} command, the first non-option cli arg (i.e. "create")
+ *   @param {array} args command line arguments (see getopts.js)
+ *   @param {object} opts command line options (see getopts.js)
+ *   @param {array} orig the argv array originaly passed to index.js
+ *   @param {string} cwd absolute path to current working directory
+ *   @param {object} cli metadata (see getenv.js:cli())
+ *   @param {object|false} app metadata (see getenv.js:read())
+ *   @param {object|false} mojito metadata (see getenv.js:mojito())
+ * @param {function(err, msg)} callback
+ */
 function main(env, cb) {
     var appConfig,
         options = {

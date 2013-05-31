@@ -3,96 +3,141 @@
  * Copyrights licensed under the New BSD License.
  * See the accompanying LICENSE file for terms.
  */
+'use strict';
 
+var join = require('path').join,
+    util = require('./lib/utils'),
+    log = require('./lib/log');
 
-/*jslint anon:true, nomen:true, sloppy:true, stupid:true*/
-
-var path = require('path'),
-    utils = require(path.join(__dirname, '../../management/utils')),
-    Mojito = require(path.join(__dirname, '../../mojito')),
-    Store = require(path.join(__dirname, '../../store')),
-    mojitoVersion = require(path.join(__dirname, '../../../package.json')).version,
-    fs = require('fs');
-
-
-function main(params, opts, callback) {
-    var root = process.cwd(),
-        store,
-        appConfig,
-        pack,
-        inputOptions = opts || {},
-        options = {},
-        app;
-
-    if (inputOptions.context) {
-        inputOptions.context = utils.contextCsvToObject(inputOptions.context);
+function tryRequire(str) {
+    var mod = false;
+    try {
+        mod = require(str);
+        log.debug('required %s', str);
+    } catch (err) {
+        log.debug('module error', err);
     }
-
-    store = Store.createStore({
-        root: root,
-        preload: 'skip', // not need to preload, we only need appConfig and package.json
-        context: inputOptions.context || {}
-    });
-    appConfig = store.getAppConfig();
-
-    pack = store.config.readConfigJSON(path.join(root, 'package.json'));
-
-    options.port = parseInt(params[0], 10) || appConfig.appPort;
-    options.port = options.port || process.env.PORT || 8666;
-
-    if (inputOptions.context) {
-        options.context = inputOptions.context;
-    }
-
-    if (inputOptions.perf) {
-        options.perf = inputOptions.perf;
-    }
-
-    app = Mojito.createServer(options);
-    app.listen(null, null, function(err) {
-        if (err) {
-            utils.error('There was an error starting the application:\n');
-            utils.error(err);
-            console.log('\n');
-            utils.error('Mojito was not started!\n', null, true);
-            return;
-        }
-        console.log('\n');
-        utils.success('\tMojito(v' + mojitoVersion + ') started' +
-            (pack.name ? ' \'' + pack.name + '\'' : '') +
-            ' on port ' + options.port + '\n');
-    });
+    return mod;
 }
 
+function exec(env, mojitoOpts, cb) {
+    var Mojito = tryRequire(join(env.mojito.path, 'lib/mojito')),
+        app;
+
+    if (!Mojito) {
+        cb(util.error(7, 'Couldn’t load lib/mojito.js'));
+        return;
+    }
+
+    function afterListen(err) {
+        var okmsg = util.fmt('\tMojito v%s started "%s" on port %d', env.mojito.version, env.app.name, mojitoOpts.port);
+
+        if (err) {
+            if (err.code === 'EADDRINUSE') {
+                cb(util.error(9, util.fmt('Port %d already in use.', mojitoOpts.port)));
+            } else {
+                log.error(err);
+                cb(util.error(11, 'Cannot start mojito'));
+            }
+        } else {
+            log.info('');
+            cb(null, util.EOL + okmsg + util.EOL);
+        }
+    }
+
+    try {
+        app = Mojito.createServer(mojitoOpts);
+        app.listen(null, null, afterListen);
+    } catch (err) {
+        cb(err);
+    }
+}
+
+function getAppConfig(mojito_dir, cwd, context) {
+    var Store = tryRequire(join(mojito_dir, 'lib/store')),
+        store,
+        appConfig;
+
+    if (Store) {
+        store = Store.createStore({
+            root: cwd,
+            preload: 'skip', // skip preload for appConfig
+            context: context
+        });
+        appConfig = store.getAppConfig();
+    }
+
+    return appConfig;
+}
 
 /**
- * Standard run method hook export.
- * @param {Array} params An array of optional parameters.
- * @param {object} opts Options/flags for the command.
- * @param {function} callback An optional callback to invoke on completion.
+ * invoke `mojito start` subcommand with env metadata and callback
+ * @see https://github.com/yahoo/mojito-cli/blob/develop/cli.js:exec()
+ * @param {object} env
+ *   @param {string} command, the first non-option cli arg (i.e. "create")
+ *   @param {array} args command line arguments (see getopts.js)
+ *   @param {object} opts command line options (see getopts.js)
+ *   @param {array} orig the argv array originaly passed to index.js
+ *   @param {string} cwd absolute path to current working directory
+ *   @param {object} cli metadata (see getenv.js:cli())
+ *   @param {object|false} app metadata (see getenv.js:read())
+ *   @param {object|false} mojito metadata (see getenv.js:mojito())
+ * @param {function(err, msg)} callback
  */
-exports = main;
+function main(env, cb) {
+    var appConfig,
+        options = {
+            port: ~~env.args.shift(),
+            context: util.parseCsvObj(env.opts.context),
+            perf: env.opts.perf
+        };
 
-/**
- * Standard usage string export.
- */
-exports.usage = '\nmojito start [port]\n' +
-    '\t- port: (optional)\n' +
-    '\t  The port number specified here is an override. If a port is not\n' +
-    '\t  specified, the port number is obtained through the application\'s\n' +
-    '\t  configuration mechanism. If one is not found there, port 8666 is' +
-    ' used.\n' +
-    '\nOptions\n' +
-    '\t--context  A comma-separated list of key:value pairs that define the' +
-    ' base\n' +
-    '\t           context used to read configuration files\n' +
-    '\t--perf     Path and filename where to output performance metrics.\n';
+    if (!env.app) {
+        cb(util.error(1, 'No package.json, please re-try from your application’s directory.'));
+        return;
+    }
 
+    if (!(env.app.dependencies && env.app.dependencies.mojito)) {
+        cb(util.error(3, 'Mojito isn’t a dependency in package.json. Try `npm i --save mojito`.'));
+        return;
+    }
 
-/**
- * Standard options list export.
- */
-exports.options = [
+    if (!env.mojito) {
+        cb(util.error(3, 'Mojito is not installed locally. Try `npm i mojito`'));
+        return;
+    }
+
+    // get application.json for the current context, because we need appPort
+    appConfig = getAppConfig(env.mojito.path, env.cwd, options.context);
+
+    if (!appConfig) {
+        cb(util.error(3, 'Cannot read application.json.'));
+        return;
+    }
+
+    if (!options.port) {
+        options.port = process.env.PORT || appConfig.appPort || 8666;
+    }
+
+    exec(env, options, cb);
+}
+
+module.exports = main;
+
+main.usage = [
+    'Usage: mojito start [options] [port]',
+    'Parameters:',
+    '  port       (optional) Port for Mojito to listen on. If omitted, $PORT,',
+    '             or appPort from application.json, or (default) 8666, is used.',
+    '',
+    'Options',
+    '  --context  A comma-separated list of key:value pairs that define the base',
+    '             context used to read configuration files',
+    '  --perf     Path and filename to save performance instrumentation data if',
+    '             you have configured a "perf" object in your application.json.'
+].join(util.EOL);
+
+main.options = [
     {shortName: null, hasValue: true, longName: 'context'},
     {shortName: null, hasValue: true, longName: 'perf'}
 ];

@@ -92,12 +92,17 @@ function main(env, cb) {
             perf: env.opts.perf
         };
 
+    if (env.opts.loglevel) {
+        log.level = env.opts.loglevel;
+    }
+
     if (!env.app) {
         cb(util.error(1, 'No package.json, please re-try from your application’s directory.'));
         return;
     }
 
     if (!(env.app.dependencies && env.app.dependencies.mojito)) {
+        log.error('The current directory doesn’t appear to be a Mojito application.');
         cb(util.error(3, 'Mojito isn’t a dependency in package.json. Try `npm i --save mojito`.'));
         return;
     }

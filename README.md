@@ -1,9 +1,9 @@
-mojito-cli-start
+mojito-cli-start [![Build Status](https://travis-ci.org/yahoo/mojito-cli-start.png?branch=develop)](https://travis-ci.org/yahoo/mojito-cli-start)
 ==========
 
 This package provides the `start` command to start a Mojito server, for the [`mojito-cli`](https://github.com/yahoo/mojito-cli) tool. Install with `npm install -g mojito-cli`.
 
-Use the following to start the server and run the application.
+Start a node.js http server and running your Mojito application:
 
     mojito start [<port>] [--context "key1:value1,key2:value2,key3:value3"]
 
@@ -17,7 +17,7 @@ http://developer.yahoo.com/forum/Yahoo-Mojito
 Licensing and Contributions
 ---------------------------
 
-mojito-cli-start is licensed under a BSD license (see LICENSE.txt). To contribute to the Mojito project, please 
+This software is free to use under the Yahoo! Inc. BSD license. See LICENSE.txt. To contribute to the Mojito project, please 
 see [Contributing](https://github.com/yahoo/mojito/wiki/Contributing-Code-to-Mojito).
 
 The Mojito project is a [meritocratic, consensus-based community project](https://github.com/yahoo/mojito/wiki/Governance-Model),

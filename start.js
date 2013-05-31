@@ -9,6 +9,7 @@ var join = require('path').join,
     util = require('./lib/utils'),
     log = require('./lib/log');
 
+
 function tryRequire(str) {
     var mod = false;
     try {
@@ -37,7 +38,7 @@ function exec(env, mojitoOpts, cb) {
                 cb(util.error(9, util.fmt('Port %d already in use.', mojitoOpts.port)));
             } else {
                 log.error(err);
-                cb(util.error(11, 'Cannot start mojito'));
+                cb(util.error(11, 'Can’t start mojito.'));
             }
         } else {
             log.info('');
@@ -65,6 +66,8 @@ function getAppConfig(mojito_dir, cwd, context) {
             context: context
         });
         appConfig = store.getAppConfig();
+    } else {
+        log.error('Failed to load Mojito store.');
     }
 
     return appConfig;
@@ -72,16 +75,16 @@ function getAppConfig(mojito_dir, cwd, context) {
 
 /**
  * invoke `mojito start` subcommand with env metadata and callback
- * @see https://github.com/yahoo/mojito-cli/blob/develop/cli.js:exec()
+ * @see https://github.com/yahoo/mojito-cli/blob/develop/cli.js exec()
  * @param {object} env
  *   @param {string} command, the first non-option cli arg (i.e. "create")
- *   @param {array} args command line arguments (see getopts.js)
- *   @param {object} opts command line options (see getopts.js)
- *   @param {array} orig the argv array originaly passed to index.js
+ *   @param {array} args command line arguments
+ *   @param {object} opts command line options
+ *   @param {array} orig the argv array originaly passed to cli
  *   @param {string} cwd absolute path to current working directory
- *   @param {object} cli metadata (see getenv.js:cli())
- *   @param {object|false} app metadata (see getenv.js:read())
- *   @param {object|false} mojito metadata (see getenv.js:mojito())
+ *   @param {object} cli metadata
+ *   @param {object|false} app metadata
+ *   @param {object|false} mojito metadata
  * @param {function(err, msg)} callback
  */
 function main(env, cb) {
@@ -92,12 +95,17 @@ function main(env, cb) {
             perf: env.opts.perf
         };
 
+    if (env.opts.loglevel) {
+        log.level = env.opts.loglevel;
+    }
+
     if (!env.app) {
         cb(util.error(1, 'No package.json, please re-try from your application’s directory.'));
         return;
     }
 
     if (!(env.app.dependencies && env.app.dependencies.mojito)) {
+        log.error('The current directory doesn’t appear to be a Mojito application.');
         cb(util.error(3, 'Mojito isn’t a dependency in package.json. Try `npm i --save mojito`.'));
         return;
     }

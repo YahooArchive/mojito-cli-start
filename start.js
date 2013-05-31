@@ -102,7 +102,7 @@ function main(env, cb) {
     }
 
     if (!options.port) {
-        options.port = appConfig.appPort || process.env.PORT || 8666;
+        options.port = process.env.PORT || appConfig.appPort || 8666;
     }
 
     exec(env, options, cb);
@@ -113,8 +113,8 @@ module.exports = main;
 main.usage = [
     'Usage: mojito start [options] [port]',
     'Parameters:',
-    '  port       (optional) Port for Mojito to listen on. If omitted, appPort',
-    '             from application.json, or process.env.PORT, or 8666, is used.',
+    '  port       (optional) Port for Mojito to listen on. If omitted, $PORT,',
+    '             or appPort from application.json, or (default) 8666, is used.',
     '',
     'Options',
     '  --context  A comma-separated list of key:value pairs that define the base',

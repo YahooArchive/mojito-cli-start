@@ -7,7 +7,9 @@ Start a node.js http server and running your Mojito application:
 
     mojito start [<port>] [--context "key1:value1,key2:value2,key3:value3"]
 
-The port number specified in the command above overrides the port number in the application configuration file, application.json. The default port number is 8666. See Specifying Context to learn how to use the --context option.
+If a port is not specified, the environment variable `$PORT` will be used if it's set. Otherwise, the `appPort` config in the application's application.json will be used, or lastly `8666` is the default.
+
+See [Specifying Context](http://developer.yahoo.com/cocktails/mojito/docs/reference/mojito_cmdline.html#specifying-context) to learn how to use the --context option.
 
 Discussion/Forums
 -----------------
@@ -17,7 +19,7 @@ http://developer.yahoo.com/forum/Yahoo-Mojito
 Licensing and Contributions
 ---------------------------
 
-This software is free to use under the Yahoo! Inc. BSD license. See LICENSE.txt. To contribute to the Mojito project, please 
+This software is free to use under the Yahoo! Inc. BSD license. See LICENSE.txt. To contribute to the Mojito project, please
 see [Contributing](https://github.com/yahoo/mojito/wiki/Contributing-Code-to-Mojito).
 
 The Mojito project is a [meritocratic, consensus-based community project](https://github.com/yahoo/mojito/wiki/Governance-Model),

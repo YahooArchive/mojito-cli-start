@@ -1,7 +1,7 @@
 {
   "name": "mojito-cli-start",
   "version": "0.0.1",
-  "description": "Provide the `start` command, to stand up a node.js server running a mojito application, for the moojito-cli.",
+  "description": "Provide the `start` command, to stand up a node.js server running a mojito application, for the mojito-cli.",
   "main": "start.js",
   "dependencies": {
     "npmlog": "0.0.2"

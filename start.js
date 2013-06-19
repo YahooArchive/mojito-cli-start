@@ -14,7 +14,7 @@ function tryRequire(str) {
     var mod = false;
     try {
         mod = require(str);
-        log.debug('required %s', str);
+        log.debug('required', str);
     } catch (err) {
         log.debug('module error', err);
     }

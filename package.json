@@ -14,8 +14,7 @@
     "npm": ">1.1"
   },
   "scripts": {
-    "prepublish": "npm test",
-    "pretest": "jshint {.,lib}/*.js*",
+    "lint": "jshint {.,lib}/*.js*",
     "test": "tap tests/index.js",
     "cover": "istanbul cover --dir artifacts/coverage tests",
     "clean": "git clean -dfX **/artifacts"

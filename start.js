@@ -55,12 +55,18 @@ function exec(env, mojitoOpts, cb) {
     }
 }
 
+function appConfigExists(cwd) {
+    return exists(join(cwd, 'application.json')) ||
+        exists(join(cwd, 'application.yml')) ||
+        exists(join(cwd, 'application.yaml'));
+}
+
 function getAppConfig(mojito_dir, cwd, context) {
     var Store = tryRequire(join(mojito_dir, 'lib/store')),
         store,
         appConfig;
 
-    if (!exists(join(cwd, 'application.json'))) {
+    if (!appConfigExists(cwd)) {
         log.info('No "application.json" found in the current directory.');
     }
 
@@ -71,6 +77,7 @@ function getAppConfig(mojito_dir, cwd, context) {
             context: context
         });
         appConfig = store.getAppConfig();
+
     } else {
         log.error('Failed to load Mojito store.');
     }

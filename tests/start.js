@@ -66,6 +66,24 @@ test('err- env.mojito falsey', function(t) {
     fn(env, cb);
 });
 
+test('err- bad store path', function(t) {
+    var args = [],
+        opts = {},
+        env = getEnv(args, opts, join(fixtures, 'app'));
+
+    function cb(err, msg) {
+        t.ok(err instanceof Error);
+        t.equal(msg, undefined);
+        t.equal(err.errno, 3);
+        t.equal(err.message, 'Cannot read application.json.');
+    }
+
+    t.plan(4);
+    env.app = {dependencies: {mojito:'1.2.3'}};
+    env.mojito = {path: 'nonesuch'};
+    fn(env, cb);
+});
+
 test('err- fail to load Store.', function(t) {
     var args = [],
         opts = {},

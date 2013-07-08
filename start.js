@@ -5,7 +5,8 @@
  */
 'use strict';
 
-var join = require('path').join,
+var exists = require('fs').existsSync,
+    join = require('path').join,
     util = require('./lib/utils'),
     log = require('./lib/log');
 
@@ -58,6 +59,10 @@ function getAppConfig(mojito_dir, cwd, context) {
     var Store = tryRequire(join(mojito_dir, 'lib/store')),
         store,
         appConfig;
+
+    if (!exists(join(cwd, 'application.json'))) {
+        log.info('No "application.json" found in the current directory.');
+    }
 
     if (Store) {
         store = Store.createStore({

@@ -5,7 +5,8 @@
  */
 'use strict';
 
-var join = require('path').join,
+var exists = require('fs').existsSync,
+    join = require('path').join,
     util = require('./lib/utils'),
     log = require('./lib/log');
 
@@ -14,7 +15,7 @@ function tryRequire(str) {
     var mod = false;
     try {
         mod = require(str);
-        log.debug('required %s', str);
+        log.debug('required', str);
     } catch (err) {
         log.debug('module error', err);
     }
@@ -54,10 +55,20 @@ function exec(env, mojitoOpts, cb) {
     }
 }
 
+function appConfigExists(cwd) {
+    return exists(join(cwd, 'application.json')) ||
+        exists(join(cwd, 'application.yml')) ||
+        exists(join(cwd, 'application.yaml'));
+}
+
 function getAppConfig(mojito_dir, cwd, context) {
     var Store = tryRequire(join(mojito_dir, 'lib/store')),
         store,
         appConfig;
+
+    if (!appConfigExists(cwd)) {
+        log.info('No "application.json" found in the current directory.');
+    }
 
     if (Store) {
         store = Store.createStore({
@@ -66,6 +77,7 @@ function getAppConfig(mojito_dir, cwd, context) {
             context: context
         });
         appConfig = store.getAppConfig();
+
     } else {
         log.error('Failed to load Mojito store.');
     }

@@ -2,11 +2,13 @@
  * Copyright (c) 2011-2013, Yahoo! Inc.  All rights reserved.
  * Copyrights licensed under the New BSD License.
  * See the accompanying LICENSE file for terms.
- */
+*/
+
+/*jslint node:true*/
+
 'use strict';
 
-var exists = require('fs').existsSync,
-    join = require('path').join,
+var join = require('path').join,
     util = require('./lib/utils'),
     log = require('./lib/log');
 
@@ -23,66 +25,24 @@ function tryRequire(str) {
 }
 
 function exec(env, mojitoOpts, cb) {
-    var Mojito = tryRequire(join(env.mojito.path, 'lib/mojito')),
-        app;
+    var packageJson,
+        app,
+        main;
 
-    if (!Mojito) {
-        cb(util.error(7, 'Couldn’t load lib/mojito.js'));
+    packageJson = tryRequire(join(env.cwd, 'package.json'));
+    if (!packageJson) {
+        cb(util.error(7, 'Missing package.json in app directory'));
         return;
     }
 
-    function afterListen(err) {
-        var okmsg = util.fmt('\tMojito v%s started "%s" on port %d', env.mojito.version, env.app.name, mojitoOpts.port);
+    main = packageJson.main || 'app.js' || 'index.js';
 
-        if (err) {
-            if (err.code === 'EADDRINUSE') {
-                cb(util.error(9, util.fmt('Port %d already in use.', mojitoOpts.port)));
-            } else {
-                log.error(err);
-                cb(util.error(11, 'Can’t start mojito.'));
-            }
-        } else {
-            log.info('');
-            cb(null, util.EOL + okmsg + util.EOL);
-        }
+    app = tryRequire(join(env.cwd, main));
+
+    if (!app) {
+        cb(util.error(7, 'Could not load startup file: ' + main));
+        return;
     }
-
-    try {
-        app = Mojito.createServer(mojitoOpts);
-        app.listen(null, null, afterListen);
-    } catch (err) {
-        cb(err);
-    }
-}
-
-function appConfigExists(cwd) {
-    return exists(join(cwd, 'application.json')) ||
-        exists(join(cwd, 'application.yml')) ||
-        exists(join(cwd, 'application.yaml'));
-}
-
-function getAppConfig(mojito_dir, cwd, context) {
-    var Store = tryRequire(join(mojito_dir, 'lib/store')),
-        store,
-        appConfig;
-
-    if (!appConfigExists(cwd)) {
-        log.info('No "application.json" found in the current directory.');
-    }
-
-    if (Store) {
-        store = Store.createStore({
-            root: cwd,
-            preload: 'skip', // skip preload for appConfig
-            context: context
-        });
-        appConfig = store.getAppConfig();
-
-    } else {
-        log.error('Failed to load Mojito store.');
-    }
-
-    return appConfig;
 }
 
 /**
@@ -100,7 +60,7 @@ function getAppConfig(mojito_dir, cwd, context) {
  * @param {function(err, msg)} callback
  */
 function main(env, cb) {
-    var appConfig,
+    var // appConfig,
         options = {
             port: ~~env.args.shift(),
             context: util.parseCsvObj(env.opts.context),
@@ -127,37 +87,14 @@ function main(env, cb) {
         return;
     }
 
-    // get application.json for the current context, because we need appPort
-    appConfig = getAppConfig(env.mojito.path, env.cwd, options.context);
-
-    if (!appConfig) {
-        cb(util.error(3, 'Cannot read application.json.'));
-        return;
-    }
-
-    if (!options.port) {
-        options.port = process.env.PORT || appConfig.appPort || 8666;
-    }
-
     exec(env, options, cb);
 }
 
 module.exports = main;
 
 main.usage = [
-    'Usage: mojito start [options] [port]',
-    'Parameters:',
-    '  port       (optional) Port for Mojito to listen on. If omitted, $PORT,',
-    '             or appPort from application.json, or (default) 8666, is used.',
-    '',
-    'Options',
-    '  --context  A comma-separated list of key:value pairs that define the base',
-    '             context used to read configuration files',
-    '  --perf     Path and filename to save performance instrumentation data if',
-    '             you have configured a "perf" object in your application.json.'
+    'Usage: mojito start'
 ].join(util.EOL);
 
 main.options = [
-    {shortName: null, hasValue: true, longName: 'context'},
-    {shortName: null, hasValue: true, longName: 'perf'}
 ];

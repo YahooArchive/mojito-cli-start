@@ -24,7 +24,7 @@ function tryRequire(str) {
     return mod;
 }
 
-function exec(env, mojitoOpts, cb) {
+function exec(env, cb) {
     var packageJson,
         app,
         main;
@@ -60,12 +60,6 @@ function exec(env, mojitoOpts, cb) {
  * @param {function(err, msg)} callback
  */
 function main(env, cb) {
-    var // appConfig,
-        options = {
-            port: ~~env.args.shift(),
-            context: util.parseCsvObj(env.opts.context),
-            perf: env.opts.perf
-        };
 
     if (env.opts.loglevel) {
         log.level = env.opts.loglevel;
@@ -87,7 +81,7 @@ function main(env, cb) {
         return;
     }
 
-    exec(env, options, cb);
+    exec(env, cb);
 }
 
 module.exports = main;
